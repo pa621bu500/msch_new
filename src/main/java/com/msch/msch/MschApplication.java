@@ -9,6 +9,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.PropertySource;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 @SpringBootApplication
 @PropertySource("classpath:application-dev.properties")
 public class MschApplication implements CommandLineRunner {
@@ -33,11 +37,19 @@ public class MschApplication implements CommandLineRunner {
 	public void run(String... args) {
 		if (args.length > 0) {
 			try {
+				// Step 1: Check if the .bat file exists
+				Path path = Paths.get(batFilePath);
+
 				if(batFilePath == null || batFilePath.isEmpty()) {
 					logger.error("No arguments provided. Expected .bat file path and interval in minutes (optional).");
 					return;
-				}else if(batFilePath.endsWith(".bat") == false) {
+				}
+				if(batFilePath.endsWith(".bat") == false) {
 					logger.error("wrong extension, expected extension .bat");
+					return;
+				}
+				if (!Files.exists(path)) {
+					logger.error("unable to find batch file at " + batFilePath);
 					return;
 				}
 				if(intervalInMinutes <= 0) {
